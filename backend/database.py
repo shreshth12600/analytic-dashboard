@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine 
 from dotenv import load_dotenv
 import os 
-print("DEBUG: database.py loaded")
-print(create_engine)
+
 load_dotenv()
 
 DB_Host = os.getenv("DB_HOST")
