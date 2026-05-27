@@ -25,17 +25,17 @@ function LoginPage({ onLogin }) {
         <div className="login-brand-blob-br" />
         <div className="login-brand-content">
           <div className="login-brand-logo-row">
-            <div className="login-brand-icon">⚡</div>
+            <div className="login-brand-icon"></div>
             <div>
-              <div className="login-brand-name">LVMV<span>/VIS</span></div>
+              <div className="login-brand-name"><span></span></div>
               <div className="login-brand-tagline">Monitoring Platform</div>
             </div>
           </div>
           <div className="login-brand-desc">
-            Advanced LV/MV grid analytics for distributed electrical monitoring systems.
+           
           </div>
           <div className="login-brand-stats">
-            {[["Live","PostgreSQL"],["REST","FastAPI"],["5","Modules"]].map(([v,l]) => (
+            {[["",""],["",""],["",""]].map(([v,l]) => (
               <div className="login-brand-stat" key={l}>
                 <div className="login-brand-stat-val">{v}</div>
                 <div className="login-brand-stat-lbl">{l}</div>
@@ -78,7 +78,7 @@ function LoginPage({ onLogin }) {
                 onKeyDown={e => e.key === "Enter" && handleLogin()}
               />
               <button className="login-eye-btn" onClick={() => setShow(!show)}>
-                {show ? "🙈" : "👁"}
+                {show ? "" : "👁"}
               </button>
             </div>
           </div>
