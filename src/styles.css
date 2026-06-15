@@ -711,3 +711,96 @@ body {
   font-size: 11px !important;
   border-radius: 8px !important;
 }
+
+
+..stack-legend{
+  display:flex;
+  gap:20px;
+  margin-bottom:20px;
+  font-size:13px;
+  color:#c8d0dc;
+}
+
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.legend-color{
+  width:14px;
+  height:14px;
+}
+
+.agg-color{
+  background:rgb(134, 184, 165);
+}
+
+.rpt-color{
+  background:rgb(222, 174, 42);
+}
+
+.runtime-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:36px;
+}
+
+.runtime-title{
+  margin-bottom:18px;
+  color:#000000;
+  font-size:16px;
+}
+
+.runtime-row{
+  margin-bottom:18px;
+}
+
+.runtime-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+
+.runtime-feature{
+  font-size:14px;
+  font-weight:600;
+  color:#000000;
+}
+
+.runtime-total{
+  font-size:13px;
+  color:#000000;
+  font-weight:600;
+}
+
+.runtime-bar{
+  height:18px;
+  background:#27313d;
+  display:flex;
+  overflow:hidden;
+  border-radius:3px;
+}
+
+.runtime-agg{
+  background:rgb(134, 184, 165);
+}
+
+.runtime-rpt{
+  background:rgb(222, 174, 42);
+}
+
+.runtime-agg,
+.runtime-rpt{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:600;
+  color:white;
+  white-space:nowrap;
+}
+
+.runtime-text{
+  pointer-events:none;
+}

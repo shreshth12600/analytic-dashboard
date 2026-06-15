@@ -1,4 +1,4 @@
-import {LineChart,Line,BarChart,Bar,XAxis,YAxis,CartesianGrid,Tooltip,Legend,ResponsiveContainer} from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import useApi from "../hooks/useapi";
 import Spinner from "../components/spinner";
 import ErrorBox from "../components/errorbox";
@@ -7,30 +7,48 @@ import KpiCard from "../components/KpiCard";
 import ExportButton from "../components/exportbutton";
 import { fmt, fmtDT, procClass } from "../utils/helpers";
 
+function fmtMMSS(seconds) {
+
+  if (!seconds) return "00:00";
+
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
 function OverviewPage() {
   const { data: kpis, loading: kl, error: ke } =
     useApi("/api/overview/kpis");
 
-  const { data: trends, loading: tl, error: te } =
-    useApi("/api/overview/trends");
+  const {data: correlationRuntime,loading: rl
+} = useApi("/api/overview/runtime");
 
-  const { data: efficiency, loading: el, error: ee } =
-    useApi("/api/overview/efficiency");
+  // const { data: breakdown, loading: bl, error: be } =
+  //     useApi("/api/overview/runtime-breakdown");
+
+  const { data: stacks, loading: bl, error: be } =
+    useApi("/api/overview/feature-stacks");
 
   const { data: logs, loading: ll, error: le } =
     useApi("/api/overview/logs");
 
-  const lineData = trends || [];
-  const barData = efficiency || [];
+
+  const dailyStack = stacks?.daily || [];
+  const monthlyStack = stacks?.monthly || [];
+
+  const dailyRuntime = correlationRuntime?.daily || [];
+
+const monthlyRuntime = correlationRuntime?.monthly || [];
+  // const barData = breakdown || [];
   const tableLogs = logs || [];
 
   return (
     <div className="page-root">
 
-      {(ke || te || ee || le) && (
-        <ErrorBox msg={ke || te || ee || le} />
-      )}
-
+      {(ke || be || le) && (
+  <ErrorBox msg={ke || be || le} />
+)}
       {/* KPI ROW */}
       <div className="kpi-row">
         {kl ? (
@@ -67,55 +85,240 @@ function OverviewPage() {
       {/* TWO CHARTS */}
       <div className="grid-2">
 
-        {/* LINE CHART */}
-        <Card title="Processing Trend by Batch">
-          {tl ? (
+        <Card
+  title="Correlation Table"
+  action={
+    <ExportButton
+      data={correlationRuntime || []}
+      filename="feature_runtime.csv"
+    />
+  }
+>
+  {rl ? (
+    <Spinner />
+  ) : (
+    <div className="table-scroll">
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Feature Name</th>
+            <th>Processing Time</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {(correlationRuntime || []).map((row, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+
+              <td>{row.featurename}</td>
+
+              <td>{row.processingtime}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</Card>
+
+        <Card title="Operation Table">
+
+          {bl ? (
             <Spinner />
           ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={lineData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="batchid"
-                />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="processing_time"
-                  name="Processing Time"
-                  dot={false}
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+
+            <>
+              <div className="stack-legend">
+
+                <div className="legend-item">
+                  <div className="legend-color agg-color"></div>
+                  Aggregation
+                </div>
+
+                <div className="legend-item">
+                  <div className="legend-color rpt-color"></div>
+                  Report
+                </div>
+
+              </div>
+
+              <div className="runtime-grid">
+
+                {/* DAILY */}
+
+                <div className="runtime-column">
+
+                  <h3 className="runtime-title">
+                    Daily
+                  </h3>
+
+                  {dailyStack.map((row) => {
+
+                    const total =
+                      row.aggregation_time +
+                      row.report_time;
+
+                    const aggWidth =
+                      total > 0
+                        ? (row.aggregation_time / total) * 100
+                        : 0;
+
+                    const rptWidth =
+                      total > 0
+                        ? (row.report_time / total) * 100
+                        : 0;
+
+                    return (
+
+                      <div
+                        key={"d-" + row.feature}
+                        className="runtime-row"
+                      >
+
+                        <div className="runtime-header">
+
+                          <div className="runtime-feature">
+                            {row.feature}
+                          </div>
+
+                          <div className="runtime-total">
+                            {fmtMMSS(row.total_time)}
+                          </div>
+
+                        </div>
+
+                        <div
+                          className="runtime-bar"
+                          title={
+                            `Aggregation: ${fmtMMSS(row.aggregation_time)}
+Report: ${fmtMMSS(row.report_time)}`
+                          }
+                        >
+
+                          {row.aggregation_time > 0 && (
+                            <div
+                              className="runtime-agg"
+                              style={{
+                                width: `${aggWidth}%`
+                              }}
+                            >
+                              <span className="runtime-text">
+                                {fmtMMSS(row.aggregation_time)}
+                              </span>
+                            </div>
+                          )}
+
+                          {row.report_time > 0 && (
+                            <div
+                              className="runtime-rpt"
+                              style={{
+                                width: `${rptWidth}%`
+                              }}
+                            >
+                              <span className="runtime-text">
+                                {fmtMMSS(row.report_time)}
+                              </span>
+                            </div>
+                          )}
+
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* MONTHLY */}
+
+                <div className="runtime-column">
+
+                  <h3 className="runtime-title">
+                    Monthly
+                  </h3>
+
+                  {monthlyStack.map((row) => {
+
+                    const total =
+                      row.aggregation_time +
+                      row.report_time;
+
+                    const aggWidth =
+                      total > 0
+                        ? (row.aggregation_time / total) * 100
+                        : 0;
+
+                    const rptWidth =
+                      total > 0
+                        ? (row.report_time / total) * 100
+                        : 0;
+
+                    return (
+
+                      <div
+                        key={"m-" + row.feature}
+                        className="runtime-row"
+                      >
+
+                        <div className="runtime-header">
+
+                          <div className="runtime-feature">
+                            {row.feature}
+                          </div>
+
+                          <div className="runtime-total">
+                            {fmtMMSS(row.total_time)}
+                          </div>
+
+                        </div>
+
+                        <div
+                          className="runtime-bar"
+                          title={
+                            `Aggregation: ${fmtMMSS(row.aggregation_time)}
+Report: ${fmtMMSS(row.report_time)}`
+                          }
+                        >
+
+                          {row.aggregation_time > 0 && (
+                            <div
+                              className="runtime-agg"
+                              style={{
+                                width: `${aggWidth}%`
+                              }}
+                            >
+                              <span className="runtime-text">
+                                {fmtMMSS(row.aggregation_time)}
+                              </span>
+                            </div>
+                          )}
+
+                          {row.report_time > 0 && (
+                            <div
+                              className="runtime-rpt"
+                              style={{
+                                width: `${rptWidth}%`
+                              }}
+                            >
+                              <span className="runtime-text">
+                                {fmtMMSS(row.report_time)}
+                              </span>
+                            </div>
+                          )}
+
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+            </>
           )}
         </Card>
 
-        {/* BAR CHART */}
-        <Card title="Runtime Efficiency">
-          {el ? (
-            <Spinner />
-          ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="batchid"
-                />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="efficiency"
-                  name="Efficiency"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </Card>
       </div>
 
       {/* LOG TABLE */}
@@ -134,49 +337,42 @@ function OverviewPage() {
           <div className="table-scroll">
             <table className="data-table">
               <thead>
-                <tr>
-                  <th>Batch ID</th>
-                  <th>Processing Days</th>
-                  <th>Meters</th>
-                  <th>Start Time</th>
-                  <th>End Time</th>
-                  <th>Processing Time</th>
-                </tr>
-              </thead>
+  <tr>
+    <th>Batch ID</th>
+    <th>Feature</th>
+    <th>Stored Procedure</th>
+    <th>Total Nodes</th>
+    <th>Total Processing Time</th>
+  </tr>
+</thead>
 
-              <tbody>
-                {tableLogs.map((row) => (
-                  <tr key={row.batchid}>
-                    <td className="td-muted">
-                      {row.batchid}
-                    </td>
+             <tbody>
+  {tableLogs.map((row, index) => (
+    <tr key={index}>
 
-                    <td>
-                      {row.processingdays}
-                    </td>
+      <td className="td-muted">
+        {row.batchid}
+      </td>
 
-                    <td>
-                      {row.meterprocessed}
-                    </td>
+      <td>
+        {row.featurename}
+      </td>
 
-                    <td className="td-mono-sm">
-                      {fmtDT(row.processstartdate)}
-                    </td>
+      <td className="td-mono-sm">
+        {row.spname}
+      </td>
 
-                    <td className="td-mono-sm">
-                      {fmtDT(row.processenddate)}
-                    </td>
+      <td>
+        {row.total_nodes}
+      </td>
 
-                    <td
-                      className={procClass(
-                        row.processingtime
-                      )}
-                    >
-                      {fmt(row.processingtime)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+      <td className="td-success">
+        {row.processingtime}
+      </td>
+
+    </tr>
+  ))}
+</tbody>
             </table>
           </div>
         )}
