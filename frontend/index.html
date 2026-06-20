@@ -16,28 +16,70 @@
 
 <body>
 
+    <!-- NAVBAR -->
+
+    <div class="navbar">
+
+        <div class="navbar-title">
+            Digital Fingerprinting Dashboard Prototype - Data Preprocessing 07
+        </div>
+
+
+    </div>
+    <div class="view-switch">
+
+    <button
+        id="dailyBtn"
+        class="view-btn active">
+
+        Daily
+
+    </button>
+
+    <button
+        id="monthlyBtn"
+        class="view-btn">
+
+        Monthly
+
+    </button>
+
+</div>
+    <!-- TOP CARDS -->
+
     <div class="top-row">
+        <div class="panel top-panel accent-purple">
 
-        <div class="panel">
-            <h2>Correlation Logs</h2>
-            <div id="correlationGrid"></div>
+    
+
+    <div class="legend">
+        <div class="legend-item">
+            <span class="legend-box agg"></span>
+            Aggregation
         </div>
 
-        <div class="panel">
-            <h2>Operation</h2>
-            <div id="operationChart"></div>
+        <div class="legend-item">
+            <span class="legend-box rpt"></span>
+            Report
         </div>
+    </div>
+
+    <div id="featureStackContainer"></div>
+
+</div>
+        <div class="panel top-panel accent-blue">
+
+    <div id="correlationGrid"></div>
+
+</div>
+
+        
 
     </div>
 
-    <div class="bottom-row">
+    <!-- TRANSACTION LOGS POPUP -->
 
-        <div class="panel">
-            <h2>Transaction Logs</h2>
-            <div id="transactionGrid"></div>
-        </div>
-
-    </div>
+    <div id="transactionPopup"></div>
 
     <script src="/js/dashboard.js"></script>
 
